@@ -19,11 +19,11 @@
     var w = obj.offsetWidth;
     var h = obj.offsetHeight;
     while (obj) {
-      l += obj.offsetLeft;
-      t += obj.offsetTop;
+      l += obj.offsetLeft - obj.scrollLeft;
+      t += obj.offsetTop - obj.scrollTop;
       obj = obj.offsetParent;
     }
-    t -= document.documentElement.scrollTop;
+    // t -= document.documentElement.scrollTop;
     this.data = {
       width: w + 'px',
       height: h + 'px',
