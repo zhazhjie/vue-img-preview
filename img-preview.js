@@ -9,6 +9,7 @@
     typeof define === 'function' && define.amd ? define(factory) :
       (global.imgPreview = factory());
 })(window, function () {
+
   var imgPreview = {};
   var params = {};
 
@@ -27,8 +28,8 @@
     var img = document.createElement('img');
     img.id = 'img-preview';
     img.src = el.src;
-    img.style = 'cursor:zoom-out;position:absolute;transition:all .3s;';
-    setImgSize(img,params);
+    img.style = 'cursor:zoom-out;position:absolute;transition:all .3s;margin-bottom:15px';
+    setImgSize(img, params);
     wrapper.appendChild(img);
     document.body.appendChild(wrapper);
     wrapper.addEventListener('click', hideImg);
@@ -54,33 +55,37 @@
     } else {
       img = createEl(this);
     }
-    var margin = 40;
+    var margin = 30;
     var imgWidth = img.naturalWidth || img.offsetWidth;
     var imgHeight = img.naturalHeight || img.offsetHeight;
     var imgRatio = imgWidth / imgHeight;
     var winWidth = window.innerWidth - margin;
     var winHeight = window.innerHeight - margin;
-    var winRatio = winWidth / winHeight;
-    if (imgWidth > winWidth  && imgRatio >= winRatio) {
+    // var winRatio = winWidth / winHeight;
+    if (imgWidth > winWidth) {
       imgWidth = winWidth;
       imgHeight = imgWidth / imgRatio;
-    } else if (imgWidth > winWidth && imgRatio < winRatio) {
-      imgHeight = winHeight;
-      imgWidth = imgHeight * imgRatio;
     }
-    if (imgHeight > winHeight) {
-      imgHeight = winHeight;
-      imgWidth = imgHeight * imgRatio;
+    // else if (imgWidth > winWidth && imgRatio < winRatio) {
+    //   imgHeight = winHeight;
+    //   imgWidth = imgHeight * imgRatio;
+    // }
+    // if (imgHeight > winHeight) {
+    //   imgHeight = winHeight;
+    //   imgWidth = imgHeight * imgRatio;
+    // }
+    var top = margin >> 1;
+    var left = ((winWidth - imgWidth) >> 1) + top;
+    if (imgHeight <= winHeight) {
+      top = ((winHeight - imgHeight) >> 1) + top;
     }
-    var top = (winHeight - imgHeight) / 2 + margin / 2;
-    var left = (winWidth - imgWidth) / 2 + margin / 2;
-      setImgSize(img, {
-        width: imgWidth,
-        height: imgHeight,
-        top: top,
-        left: left
-      });
-      getEl('wrapper-modal').style.opacity = 1;
+    setImgSize(img, {
+      width: imgWidth,
+      height: imgHeight,
+      top: top,
+      left: left
+    });
+    getEl('wrapper-modal').style.opacity = 1;
   }
 
   function hideImg() {
