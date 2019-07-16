@@ -20,11 +20,7 @@
   function createEl(el) {
     var wrapper = document.createElement('div');
     wrapper.id = 'img-preview-wrapper';
-    wrapper.style = 'width:100vw;height:100vh;position:fixed;top:0;left:0;z-index:9998;overflow-x:hidden;';
-    var modal = document.createElement('div');
-    modal.id = 'wrapper-modal';
-    modal.style = 'position:fixed;background:rgba(0, 0, 0, 0.3);width:100%;height:100%;opacity:0;transition:all .3s;';
-    wrapper.appendChild(modal);
+    wrapper.style = 'width:100vw;height:100vh;position:fixed;top:0;left:0;z-index:9998;overflow-x:hidden;backgroundColor:rgba(0, 0, 0, 0);transition:all .3s;';
     var img = document.createElement('img');
     img.id = 'img-preview';
     img.src = el.src;
@@ -33,7 +29,10 @@
     wrapper.appendChild(img);
     document.body.appendChild(wrapper);
     wrapper.addEventListener('click', hideImg);
-    return img;
+    return {
+      img: img,
+      wrapper: wrapper
+    };
   }
 
   function setImgSize(img, data) {
@@ -53,7 +52,9 @@
       img.src = this.src;
       setImgSize(img, params);
     } else {
-      img = createEl(this);
+      var ele = createEl(this);
+      img = ele.img;
+      wrapper = ele.wrapper;
     }
     var margin = 30;
     var imgWidth = img.naturalWidth || img.offsetWidth;
@@ -78,8 +79,8 @@
     var left = ((winWidth - imgWidth) >> 1) + top;
     if (imgHeight <= winHeight) {
       top = ((winHeight - imgHeight) >> 1) + top;
+      wrapper.style.overflowY = 'hidden';
     } else {
-      var wrapper = getEl('img-preview-wrapper');
       wrapper.style.overflowY = 'scroll';
       imgWidth -= wrapper.offsetWidth - wrapper.clientWidth;
     }
@@ -90,7 +91,7 @@
         top: top,
         left: left
       });
-      getEl('wrapper-modal').style.opacity = 1;
+      wrapper.style.backgroundColor = 'rgba(0,0,0,0.3)';
     })
 
   }
@@ -99,9 +100,10 @@
     //console.log(this)
     document.body.style.overflow = '';
     setImgSize(getEl('img-preview'), params);
-    getEl('wrapper-modal').style.opacity = 0;
+    var wrapper = getEl('img-preview-wrapper');
+    wrapper.style.backgroundColor = 'rgba(0,0,0,0)';
     setTimeout(function () {
-      getEl('img-preview-wrapper').style.display = 'none';
+      wrapper.style.display = 'none';
     }, 300)
   }
 
