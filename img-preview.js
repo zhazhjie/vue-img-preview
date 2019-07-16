@@ -61,7 +61,7 @@
     var winWidth = window.innerWidth - margin;
     var winHeight = window.innerHeight - margin;
     var winRatio = winWidth / winHeight;
-    if (imgWidth > winWidth ) {
+    if (imgWidth > winWidth  && imgRatio >= winRatio) {
       imgWidth = winWidth;
       imgHeight = imgWidth / imgRatio;
     } else if (imgWidth > winWidth && imgRatio < winRatio) {
