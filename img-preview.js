@@ -1,120 +1,105 @@
 /**
- * 
+ *
  * @authors zhazhjie (zhazhjie@vip.qq.com)
  * @date    2018-05-12 15:32:18
  * @version 1.0
  */
-(function(global, factory) {
+(function (global, factory) {
   typeof module !== 'undefined' ? module.exports = factory() :
     typeof define === 'function' && define.amd ? define(factory) :
-    (global.imgPreview = factory());
-})(window, function() {
-  try {
-    require('./velocity.min.js');
-  } catch (e) {}
+      (global.imgPreview = factory());
+})(window, function () {
   var imgPreview = {};
-  imgPreview.getPos = function(obj) {
-    var l = 0,
-      t = 0;
-    var w = obj.offsetWidth;
-    var h = obj.offsetHeight;
-    while (obj) {
-      l += obj.offsetLeft - obj.scrollLeft;
-      t += obj.offsetTop - obj.scrollTop;
-      obj = obj.offsetParent;
-    }
-    // t -= document.documentElement.scrollTop;
-    this.data = {
-      width: w + 'px',
-      height: h + 'px',
-      left: l + 'px',
-      top: t + 'px'
-    }
-  }
-  imgPreview.getEl = function(id) {
+  var params = {};
+
+  function getEl(id) {
     return document.getElementById(id);
   }
-  imgPreview.createEl = function(el) {
-    var div = document.createElement('div');
-    var html = `<div id="img-pre-wrap" style="width:100%;height:100%;position:fixed;top:0;left:0;z-index:998"><div id="img-modal" style="background:rgba(0, 0, 0, 0.3);width:100%;height:100%;opacity:0;"></div><img id="img-pre" src="${el.src}" style="cursor:zoom-out;position:fixed; z-index:999;width:${this.data.width};height:${this.data.height};top:${this.data.top};left:${this.data.left};"></div>`;
-    div.innerHTML = html;
-    document.body.appendChild(div);
-    div.addEventListener('click', this.hideImg.bind(this), false);
+
+  function createEl(el) {
+    var wrapper = document.createElement('div');
+    wrapper.id = 'img-preview-wrapper';
+    wrapper.style = 'width:100vw;height:100vh;position:fixed;top:0;left:0;z-index:9998;overflow:auto;';
+    var modal = document.createElement('div');
+    modal.id = 'wrapper-modal';
+    modal.style = 'position:fixed;background:rgba(0, 0, 0, 0.3);width:100%;height:100%;opacity:0;transition:all .3s;';
+    wrapper.appendChild(modal);
+    var img = document.createElement('img');
+    img.id = 'img-preview';
+    img.src = el.src;
+    img.style = 'cursor:zoom-out;position:absolute;transition:all .3s;';
+    setImgSize(img,params);
+    wrapper.appendChild(img);
+    document.body.appendChild(wrapper);
+    wrapper.addEventListener('click', hideImg);
+    return img;
   }
-  imgPreview.showImg = function(el) {
+
+  function setImgSize(img, data) {
+    img.style.width = data.width + 'px';
+    img.style.height = data.height + 'px';
+    img.style.top = data.top + 'px';
+    img.style.left = data.left + 'px';
+  }
+
+  function showImg(e) {
     document.body.style.overflow = 'hidden';
-    this.getPos(el);
-    if (this.getEl('img-pre-wrap')) {
-      var wrap = this.getEl('img-pre-wrap');
-      wrap.style.display = 'block';
-      var img = this.getEl('img-pre');
-      img.src = el.src;
-      img.style.width = this.data.width;
-      img.style.height = this.data.height;
-      img.style.top = this.data.top;
-      img.style.left = this.data.left;
+    params = this.getBoundingClientRect();
+    var wrapper = getEl('img-preview-wrapper');
+    var img = getEl('img-preview');
+    if (wrapper) {
+      wrapper.style.display = 'block';
+      img.src = this.src;
+      setImgSize(img, params);
     } else {
-      this.createEl(el);
+      img = createEl(this);
     }
-    var img = this.getEl('img-pre');
-    var w = img.naturalWidth;
-    var h = img.naturalHeight;
-    var nr = w / h;
-    var W = document.documentElement.clientWidth;
-    var H = document.documentElement.clientHeight;
-    var sr = W / h;
-    if (w > W - 40 && nr >= sr) {
-      w = W - 40;
-      h = w / nr;
-    } else if (w > W - 40 && nr < sr) {
-      h = H - 40;
-      w = h * nr;
+    var margin = 40;
+    var imgWidth = img.naturalWidth || img.offsetWidth;
+    var imgHeight = img.naturalHeight || img.offsetHeight;
+    var imgRatio = imgWidth / imgHeight;
+    var winWidth = window.innerWidth - margin;
+    var winHeight = window.innerHeight - margin;
+    var winRatio = winWidth / winHeight;
+    if (imgWidth > winWidth ) {
+      imgWidth = winWidth;
+      imgHeight = imgWidth / imgRatio;
+    } else if (imgWidth > winWidth && imgRatio < winRatio) {
+      imgHeight = winHeight;
+      imgWidth = imgHeight * imgRatio;
     }
-    if (h > H - 40) {
-      h = H - 40;
-      w = h * nr;
+    if (imgHeight > winHeight) {
+      imgHeight = winHeight;
+      imgWidth = imgHeight * imgRatio;
     }
-    var t = (H - h) / 2;
-    var l = (W - w) / 2;
-    Velocity(img, {
-      top: t,
-      left: l,
-      width: w,
-      height: h
-    }, {
-      duration: 300
-    })
-    Velocity(this.getEl('img-modal'), {
-      opacity: 1
-    }, {
-      duration: 300
-    })
+    var top = (winHeight - imgHeight) / 2 + margin / 2;
+    var left = (winWidth - imgWidth) / 2 + margin / 2;
+      setImgSize(img, {
+        width: imgWidth,
+        height: imgHeight,
+        top: top,
+        left: left
+      });
+      getEl('wrapper-modal').style.opacity = 1;
   }
-  imgPreview.hideImg = function() {
+
+  function hideImg() {
     //console.log(this)
     document.body.style.overflow = '';
-    var img = this.getEl('img-pre');
-    var modal = this.getEl('img-modal');
-    Velocity(img, this.data, {
-      duration: 300,
-      complete: () => {
-        var wrap = this.getEl('img-pre-wrap');
-        wrap.style.display = 'none';
-      }
-    })
-    Velocity(modal, {
-      opacity: 0
-    }, {
-      duration: 300
-    })
+    setImgSize(getEl('img-preview'), params);
+    getEl('wrapper-modal').style.opacity = 0;
+    setTimeout(function () {
+      getEl('img-preview-wrapper').style.display = 'none';
+    }, 300)
   }
-  imgPreview.install = function(Vue) {
+
+  imgPreview.install = function (Vue) {
     Vue.directive('img-preview', {
-      bind: (el, binding)=>{
+      bind: (el, binding) => {
         el.style.cursor = 'zoom-in';
-        el.addEventListener('click', () => { this.showImg(el) }, false)
+        el.addEventListener('click', showImg)
       }
     })
-  }
+  };
   return imgPreview;
-})
+});
