@@ -20,7 +20,7 @@
   function createEl(el) {
     var wrapper = document.createElement('div');
     wrapper.id = 'img-preview-wrapper';
-    wrapper.style = 'width:100vw;height:100vh;position:fixed;top:0;left:0;z-index:9998;overflow:auto;';
+    wrapper.style = 'width:100vw;height:100vh;position:fixed;top:0;left:0;z-index:9998;overflow-x:hidden;';
     var modal = document.createElement('div');
     modal.id = 'wrapper-modal';
     modal.style = 'position:fixed;background:rgba(0, 0, 0, 0.3);width:100%;height:100%;opacity:0;transition:all .3s;';
@@ -78,14 +78,21 @@
     var left = ((winWidth - imgWidth) >> 1) + top;
     if (imgHeight <= winHeight) {
       top = ((winHeight - imgHeight) >> 1) + top;
+    } else {
+      var wrapper = getEl('img-preview-wrapper');
+      wrapper.style.overflowY = 'scroll';
+      imgWidth -= wrapper.offsetWidth - wrapper.clientWidth;
     }
-    setImgSize(img, {
-      width: imgWidth,
-      height: imgHeight,
-      top: top,
-      left: left
-    });
-    getEl('wrapper-modal').style.opacity = 1;
+    setTimeout(function () {
+      setImgSize(img, {
+        width: imgWidth,
+        height: imgHeight,
+        top: top,
+        left: left
+      });
+      getEl('wrapper-modal').style.opacity = 1;
+    })
+
   }
 
   function hideImg() {
