@@ -18,4 +18,4 @@ Vue.use(imgPreview)
 
 ## 预览
 
-<a href="https://zhazhjie.github.io/fly-ui">Demo</a>
+预览移至fly-ui项目，<a href="https://zhazhjie.github.io/fly-ui">戳这里</a>
